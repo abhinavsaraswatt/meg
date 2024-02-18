@@ -7,9 +7,13 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
+
+// ProxyAddr holds the proxy address.
+var ProxyAddr string
 
 var transport = &http.Transport{
 	TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
@@ -19,6 +23,13 @@ var transport = &http.Transport{
 		KeepAlive: time.Second,
 		DualStack: true,
 	}).DialContext,
+	Proxy: func(request *http.Request) (*url.URL, error) {
+		ProxyAddr = "http://172.22.112.1:8081"
+		if ProxyAddr != "" {
+			return url.Parse(ProxyAddr)
+		}
+		return nil, nil
+	},
 }
 
 var httpClient = &http.Client{
@@ -90,3 +101,4 @@ func goRequest(r request) response {
 		body:       body,
 	}
 }
+
